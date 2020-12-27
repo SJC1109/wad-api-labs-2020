@@ -5,6 +5,7 @@ import express from 'express';
 import moviesRouter from './api/movies';
 import bodyParser from 'body-parser';
 import usersRouter from './api/users';
+import genresRouter from './api/genres'
 const errHandler = (err, req, res, next) => {
     /* if the error in development then send stack trace to display whole error,
     if it's in production then just send error message  */
@@ -27,6 +28,7 @@ app.use(bodyParser.urlencoded());
 app.use(express.static('public'));
 app.use('/api/users', usersRouter);
 app.use('/api/movies', moviesRouter);
+app.use('/api/genres', genresRouter)
 app.use(errHandler);
 app.listen(port, () => {
   console.info(`Server running at ${port}`);
