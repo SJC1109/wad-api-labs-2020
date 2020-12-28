@@ -1,11 +1,19 @@
-import {loadUsers} from './seedData'
-import './db';
 import dotenv from 'dotenv';
 import express from 'express';
 import moviesRouter from './api/movies';
 import bodyParser from 'body-parser';
+import './db';
+import {loadUsers} from './seedData'
 import usersRouter from './api/users';
 import genresRouter from './api/genres'
+import session from 'express-session';
+import authenticate from './authenticate';
+
+dotenv.config();
+if (process.env.SEED_DB) {
+    loadUsers();
+  }
+
 const errHandler = (err, req, res, next) => {
     /* if the error in development then send stack trace to display whole error,
     if it's in production then just send error message  */
@@ -14,10 +22,7 @@ const errHandler = (err, req, res, next) => {
     }
     res.status(500).send(`Hey!! You caught the error 👍👍, ${err.stack} `);
   };
-  if (process.env.SEED_DB) {
-    loadUsers();
-  }
-dotenv.config();
+
 
 const app = express();
 
@@ -25,9 +30,15 @@ const port = process.env.PORT;
 //configure body-parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
+
+app.use(session({
+    secret: 'ilikecake',
+    resave: true,
+    saveUninitialized: true
+  }));
 app.use(express.static('public'));
+app.use('/api/movies', authenticate, moviesRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/movies', moviesRouter);
 app.use('/api/genres', genresRouter)
 app.use(errHandler);
 app.listen(port, () => {
